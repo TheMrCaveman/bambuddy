@@ -373,6 +373,22 @@ export interface Archive {
   created_by_username: string | null;
 }
 
+export interface ArchiveSlim {
+  printer_id: number | null;
+  print_name: string | null;
+  print_time_seconds: number | null;
+  actual_time_seconds: number | null;
+  filament_used_grams: number | null;
+  filament_type: string | null;
+  filament_color: string | null;
+  status: string;
+  started_at: string | null;
+  completed_at: string | null;
+  cost: number | null;
+  quantity: number;
+  created_at: string;
+}
+
 export interface PrintLogEntry {
   id: number;
   print_name: string | null;
@@ -2489,13 +2505,22 @@ export const api = {
     request<{ used_bytes: number | null; free_bytes: number | null }>(`/printers/${printerId}/storage`),
 
   // Archives
-  getArchives: (printerId?: number, projectId?: number, limit = 50, offset = 0) => {
+  getArchives: (printerId?: number, projectId?: number, limit = 50, offset = 0, dateFrom?: string, dateTo?: string) => {
     const params = new URLSearchParams();
     if (printerId) params.set('printer_id', String(printerId));
     if (projectId) params.set('project_id', String(projectId));
     params.set('limit', String(limit));
     params.set('offset', String(offset));
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo) params.set('date_to', dateTo);
     return request<Archive[]>(`/archives/?${params}`);
+  },
+  getArchivesSlim: (dateFrom?: string, dateTo?: string) => {
+    const params = new URLSearchParams();
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo) params.set('date_to', dateTo);
+    const qs = params.toString();
+    return request<ArchiveSlim[]>(`/archives/slim${qs ? `?${qs}` : ''}`);
   },
   getArchive: (id: number) => request<Archive>(`/archives/${id}`),
   searchArchives: (query: string, options?: {
@@ -2536,7 +2561,13 @@ export const api = {
     request<Archive>(`/archives/${id}/favorite`, { method: 'POST' }),
   deleteArchive: (id: number) =>
     request<void>(`/archives/${id}`, { method: 'DELETE' }),
-  getArchiveStats: () => request<ArchiveStats>('/archives/stats'),
+  getArchiveStats: (options?: { dateFrom?: string; dateTo?: string }) => {
+    const params = new URLSearchParams();
+    if (options?.dateFrom) params.set('date_from', options.dateFrom);
+    if (options?.dateTo) params.set('date_to', options.dateTo);
+    const qs = params.toString();
+    return request<ArchiveStats>(`/archives/stats${qs ? `?${qs}` : ''}`);
+  },
   // Tag management
   getTags: () => request<TagInfo[]>('/archives/tags'),
   renameTag: (oldName: string, newName: string) =>
@@ -2550,12 +2581,15 @@ export const api = {
     }),
   recalculateCosts: () =>
     request<{ message: string; updated: number }>('/archives/recalculate-costs', { method: 'POST' }),
-  getFailureAnalysis: (options?: { days?: number; printerId?: number; projectId?: number }) => {
+  getFailureAnalysis: (options?: { days?: number; dateFrom?: string; dateTo?: string; printerId?: number; projectId?: number }) => {
     const params = new URLSearchParams();
     if (options?.days) params.set('days', String(options.days));
+    if (options?.dateFrom) params.set('date_from', options.dateFrom);
+    if (options?.dateTo) params.set('date_to', options.dateTo);
     if (options?.printerId) params.set('printer_id', String(options.printerId));
     if (options?.projectId) params.set('project_id', String(options.projectId));
-    return request<FailureAnalysis>(`/archives/analysis/failures?${params}`);
+    const qs = params.toString();
+    return request<FailureAnalysis>(`/archives/analysis/failures${qs ? `?${qs}` : ''}`);
   },
   compareArchives: (archiveIds: number[]) =>
     request<ArchiveComparison>(`/archives/compare?archive_ids=${archiveIds.join(',')}`),
