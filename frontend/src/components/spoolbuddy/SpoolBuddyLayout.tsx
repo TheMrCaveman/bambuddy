@@ -4,6 +4,7 @@ import { SpoolBuddyTopBar } from './SpoolBuddyTopBar';
 import { SpoolBuddyBottomNav } from './SpoolBuddyBottomNav';
 import { SpoolBuddyStatusBar } from './SpoolBuddyStatusBar';
 import { useSpoolBuddyState } from '../../hooks/useSpoolBuddyState';
+import { VirtualKeyboard } from '../VirtualKeyboard';
 
 export function SpoolBuddyLayout() {
   const [selectedPrinterId, setSelectedPrinterId] = useState<number | null>(null);
@@ -43,6 +44,7 @@ export function SpoolBuddyLayout() {
 
       <SpoolBuddyStatusBar alert={alert} />
       <SpoolBuddyBottomNav />
+      <VirtualKeyboard />
     </div>
   );
 }

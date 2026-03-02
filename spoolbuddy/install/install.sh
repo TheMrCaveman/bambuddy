@@ -360,13 +360,13 @@ create_spoolbuddy_user() {
         success "Service user created"
     fi
 
-    # Add to hardware access groups (gpio, spi, i2c)
-    for group in gpio spi i2c; do
+    # Add to hardware access groups (gpio, spi, i2c, video for backlight)
+    for group in gpio spi i2c video; do
         if getent group "$group" &>/dev/null; then
             usermod -aG "$group" "$SPOOLBUDDY_SERVICE_USER" 2>/dev/null || true
         fi
     done
-    success "User added to gpio, spi, i2c groups"
+    success "User added to gpio, spi, i2c, video groups"
 }
 
 download_spoolbuddy() {

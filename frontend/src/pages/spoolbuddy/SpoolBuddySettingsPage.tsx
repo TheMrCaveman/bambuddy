@@ -318,27 +318,29 @@ function ScaleTab({ device, weight, weightStable, rawAdc }: {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Weight + info row */}
-      <div className="bg-zinc-800 rounded-lg p-3 mb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${weightStable ? 'bg-green-500' : 'bg-amber-500 animate-pulse'}`} />
-            <span className="text-lg font-mono text-zinc-200">
-              {weight !== null ? `${weight.toFixed(1)} g` : '-- g'}
-            </span>
+      {/* Weight + info row — hidden during weight entry to maximize numpad space */}
+      {calStep !== 'weight' && (
+        <div className="bg-zinc-800 rounded-lg p-3 mb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${weightStable ? 'bg-green-500' : 'bg-amber-500 animate-pulse'}`} />
+              <span className="text-lg font-mono text-zinc-200">
+                {weight !== null ? `${weight.toFixed(1)} g` : '-- g'}
+              </span>
+            </div>
+            <div className="text-xs text-zinc-500 text-right">
+              <span>{t('spoolbuddy.settings.tareOffset', 'Tare')}: {device.tare_offset}</span>
+              <span className="mx-1.5">&middot;</span>
+              <span>{t('spoolbuddy.settings.calFactor', 'Factor')}: {device.calibration_factor.toFixed(2)}</span>
+            </div>
           </div>
-          <div className="text-xs text-zinc-500 text-right">
-            <span>{t('spoolbuddy.settings.tareOffset', 'Tare')}: {device.tare_offset}</span>
-            <span className="mx-1.5">&middot;</span>
-            <span>{t('spoolbuddy.settings.calFactor', 'Factor')}: {device.calibration_factor.toFixed(2)}</span>
-          </div>
+          {device.last_calibrated_at && (
+            <div className="text-xs text-zinc-600 mt-1">
+              {t('spoolbuddy.settings.lastCalibrated', 'Last calibrated')}: {formatDateTime(device.last_calibrated_at)}
+            </div>
+          )}
         </div>
-        {device.last_calibrated_at && (
-          <div className="text-xs text-zinc-600 mt-1">
-            {t('spoolbuddy.settings.lastCalibrated', 'Last calibrated')}: {formatDateTime(device.last_calibrated_at)}
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Status message */}
       {status && (
@@ -374,60 +376,69 @@ function ScaleTab({ device, weight, weightStable, rawAdc }: {
         </div>
       ) : (
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 flex flex-col flex-1 min-h-0">
-            <div className="text-sm font-medium text-zinc-200 mb-2">
+          {/* Step header with inline live weight */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-medium text-zinc-200">
               {calStep === 'tare'
-                ? t('spoolbuddy.settings.calStep1', 'Step 1: Remove all items from the scale')
+                ? t('spoolbuddy.settings.calStep1', 'Step 1: Remove all items from scale')
                 : t('spoolbuddy.settings.calStep2', 'Step 2: Place known weight on scale')}
             </div>
+            <div className="flex items-center gap-1.5 ml-2 shrink-0">
+              <div className={`w-1.5 h-1.5 rounded-full ${weightStable ? 'bg-green-500' : 'bg-amber-500 animate-pulse'}`} />
+              <span className="text-xs font-mono text-zinc-400">
+                {weight !== null ? `${weight.toFixed(1)}g` : '--'}
+              </span>
+            </div>
+          </div>
 
-            {calStep === 'weight' && (
-              <div className="flex-1 flex flex-col min-h-0">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-xs text-zinc-400">{t('spoolbuddy.settings.knownWeight', 'Weight (g)')}</span>
-                  <div className="flex-1 bg-zinc-900 border border-zinc-600 rounded px-3 py-1 text-right text-base font-mono text-zinc-100">
-                    {knownWeight || '0'}<span className="text-zinc-500 ml-1">g</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 gap-1 flex-1">
-                  {['7','8','9','backspace','4','5','6','.','1','2','3','0'].map((key) => (
-                    <button
-                      key={key}
-                      onClick={() => numpadPress(key)}
-                      className={`rounded text-sm font-medium transition-colors ${
-                        key === 'backspace'
-                          ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
-                          : 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border border-zinc-700'
-                      }`}
-                    >
-                      {key === 'backspace' ? '\u232B' : key}
-                    </button>
-                  ))}
+          {calStep === 'weight' && (
+            <>
+              {/* Weight input + numpad */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs text-zinc-400">{t('spoolbuddy.settings.knownWeight', 'Weight (g)')}</span>
+                <div className="flex-1 bg-zinc-900 border border-zinc-600 rounded px-3 py-1.5 text-right text-lg font-mono text-zinc-100">
+                  {knownWeight || '0'}<span className="text-zinc-500 ml-1">g</span>
                 </div>
               </div>
-            )}
+              <div className="grid grid-cols-4 gap-1.5 mb-2">
+                {['7','8','9','backspace','4','5','6','.','1','2','3','0'].map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => numpadPress(key)}
+                    className={`rounded text-lg font-medium transition-colors min-h-[56px] active:scale-95 ${
+                      key === 'backspace'
+                        ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                        : 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border border-zinc-700'
+                    }`}
+                  >
+                    {key === 'backspace' ? '\u232B' : key}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => { setCalStep('idle'); setStatus(null); }}
-                className="flex-1 px-4 py-2 rounded-lg text-sm bg-zinc-700 text-zinc-300 hover:bg-zinc-600 transition-colors min-h-[40px]"
-              >
-                {t('common.cancel', 'Cancel')}
-              </button>
-              <button
-                onClick={handleCalStep}
-                disabled={busy}
-                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-40 transition-colors min-h-[40px] flex items-center justify-center gap-2"
-              >
-                {busy && (
-                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                )}
-                {calStep === 'tare' ? t('spoolbuddy.settings.setZero', 'Set Zero') : t('spoolbuddy.settings.calibrateNow', 'Calibrate')}
-              </button>
-            </div>
+          {/* Action buttons */}
+          <div className="flex gap-2 mt-auto">
+            <button
+              onClick={() => { setCalStep('idle'); setStatus(null); }}
+              className="flex-1 px-4 py-2.5 rounded-lg text-sm bg-zinc-700 text-zinc-300 hover:bg-zinc-600 transition-colors min-h-[44px]"
+            >
+              {t('common.cancel', 'Cancel')}
+            </button>
+            <button
+              onClick={handleCalStep}
+              disabled={busy}
+              className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-40 transition-colors min-h-[44px] flex items-center justify-center gap-2"
+            >
+              {busy && (
+                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              )}
+              {calStep === 'tare' ? t('spoolbuddy.settings.setZero', 'Set Zero') : t('spoolbuddy.settings.calibrateNow', 'Calibrate')}
+            </button>
           </div>
         </div>
       )}

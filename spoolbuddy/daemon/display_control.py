@@ -1,6 +1,12 @@
-"""Display brightness and screen blanking control for SpoolBuddy kiosk."""
+"""Display brightness and screen blanking control for SpoolBuddy kiosk.
+
+Brightness: controlled via sysfs /sys/class/backlight/*/brightness (DSI displays only).
+Blanking: uses vcgencmd display_power (RPi firmware-level, works for both HDMI and DSI
+without needing Wayland socket access).
+"""
 
 import logging
+import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -14,6 +20,7 @@ class DisplayControl:
     def __init__(self):
         self._backlight_path = self._find_backlight()
         self._max_brightness = self._read_max_brightness()
+        self._has_vcgencmd = shutil.which("vcgencmd") is not None
         self._blank_timeout = 0  # seconds, 0 = disabled
         self._last_activity = time.monotonic()
         self._blanked = False
@@ -22,6 +29,11 @@ class DisplayControl:
             logger.info("Backlight found: %s (max=%d)", self._backlight_path, self._max_brightness)
         else:
             logger.info("No DSI backlight found, brightness control unavailable")
+
+        if self._has_vcgencmd:
+            logger.info("vcgencmd available, screen blanking enabled")
+        else:
+            logger.warning("vcgencmd not found, screen blanking unavailable")
 
     def _find_backlight(self) -> Path | None:
         if not BACKLIGHT_BASE.exists():
@@ -53,6 +65,11 @@ class DisplayControl:
         try:
             (self._backlight_path / "brightness").write_text(str(value))
             logger.debug("Brightness set to %d%% (%d/%d)", pct, value, self._max_brightness)
+        except PermissionError:
+            logger.warning(
+                "Permission denied writing to %s/brightness. Ensure spoolbuddy user is in the 'video' group.",
+                self._backlight_path,
+            )
         except Exception as e:
             logger.warning("Failed to set brightness: %s", e)
 
@@ -77,17 +94,21 @@ class DisplayControl:
             self._blank()
 
     def _blank(self):
+        if not self._has_vcgencmd:
+            return
         try:
-            subprocess.run(["wlopm", "--off", "*"], capture_output=True, timeout=5)
+            subprocess.run(["vcgencmd", "display_power", "0"], capture_output=True, timeout=5)
             self._blanked = True
-            logger.debug("Screen blanked after idle timeout")
+            logger.debug("Screen blanked via vcgencmd")
         except Exception as e:
             logger.warning("Failed to blank screen: %s", e)
 
     def _unblank(self):
+        if not self._has_vcgencmd:
+            return
         try:
-            subprocess.run(["wlopm", "--on", "*"], capture_output=True, timeout=5)
+            subprocess.run(["vcgencmd", "display_power", "1"], capture_output=True, timeout=5)
             self._blanked = False
-            logger.debug("Screen unblanked")
+            logger.debug("Screen unblanked via vcgencmd")
         except Exception as e:
             logger.warning("Failed to unblank screen: %s", e)
