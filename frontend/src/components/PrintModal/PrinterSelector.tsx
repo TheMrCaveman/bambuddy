@@ -16,6 +16,8 @@ import { getColorName } from '../../utils/colors';
 import {
   normalizeColorForCompare,
   colorsAreSimilar,
+  autoMatchFilament,
+  filterFilamentsByNozzle,
 } from '../../utils/amsHelpers';
 import type { PrinterSelectorProps, AssignmentMode } from './types';
 import type { PrinterMappingResult, PerPrinterConfig } from '../../hooks/useMultiPrinterFilamentMapping';
@@ -101,30 +103,8 @@ function InlineMappingEditor({
       loaded = printerResult.loadedFilaments.find((f) => f.globalTrayId === currentMapping);
       isManual = true;
     } else {
-      // Auto-match logic
       const usedTrayIds = new Set<number>(Object.values(printerResult.config.manualMappings));
-
-      const exactMatch = printerResult.loadedFilaments.find(
-        (f) =>
-          !usedTrayIds.has(f.globalTrayId) &&
-          f.type?.toUpperCase() === req.type?.toUpperCase() &&
-          normalizeColorForCompare(f.color) === normalizeColorForCompare(req.color)
-      );
-      const similarMatch = exactMatch
-        ? undefined
-        : printerResult.loadedFilaments.find(
-            (f) =>
-              !usedTrayIds.has(f.globalTrayId) &&
-              f.type?.toUpperCase() === req.type?.toUpperCase() &&
-              colorsAreSimilar(f.color, req.color)
-          );
-      const typeOnlyMatch =
-        exactMatch || similarMatch
-          ? undefined
-          : printerResult.loadedFilaments.find(
-              (f) => !usedTrayIds.has(f.globalTrayId) && f.type?.toUpperCase() === req.type?.toUpperCase()
-            );
-      loaded = exactMatch ?? similarMatch ?? typeOnlyMatch;
+      loaded = autoMatchFilament(req, printerResult.loadedFilaments, usedTrayIds) as LoadedFilament | undefined;
     }
 
     // Determine status
@@ -188,7 +168,8 @@ function InlineMappingEditor({
             <option value="" className="bg-bambu-dark text-bambu-gray">
               -- Select slot --
             </option>
-            {printerResult.loadedFilaments.map((f) => (
+            {filterFilamentsByNozzle(printerResult.loadedFilaments, req.nozzle_id)
+              .map((f) => (
               <option key={f.globalTrayId} value={f.globalTrayId} className="bg-bambu-dark text-white">
                 {f.label}: {f.type} ({f.colorName})
               </option>
