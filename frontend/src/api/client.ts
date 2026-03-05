@@ -134,6 +134,8 @@ export interface AMSUnit {
   temp: number | null;
   is_ams_ht: boolean;  // True for AMS-HT (single spool), False for regular AMS (4 spools)
   tray: AMSTray[];
+  serial_number: string;  // AMS unit serial number (from MQTT sn field)
+  sw_ver: string;         // AMS firmware version (from get_version info.module ams/* entry)
 }
 
 export interface NozzleInfo {
@@ -1878,6 +1880,7 @@ export interface SpoolAssignment {
   spool?: InventorySpool | null;
   configured: boolean;
   created_at: string;
+  ams_label?: string | null;  // User-defined friendly name for the AMS unit
 }
 
 // Update types
@@ -3345,6 +3348,23 @@ export const api = {
     request<{ success: boolean }>(`/printers/${printerId}/slot-presets/${amsId}/${trayId}`, {
       method: 'DELETE',
     }),
+
+  // AMS Labels (user-defined friendly names)
+  getAmsLabels: (printerId: number) =>
+    request<Record<number, string>>(`/printers/${printerId}/ams-labels`),
+  saveAmsLabel: (printerId: number, amsId: number, label: string, amsSerial = '') =>
+    request<{ ams_id: number; label: string }>(
+      `/printers/${printerId}/ams-labels/${amsId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ label, ams_serial: amsSerial }),
+      }
+    ),
+  deleteAmsLabel: (printerId: number, amsId: number, amsSerial = '') =>
+    request<{ success: boolean }>(`/printers/${printerId}/ams-labels/${amsId}?ams_serial=${encodeURIComponent(amsSerial)}`, {
+      method: 'DELETE',
+    }),
+
   configureAmsSlot: (
     printerId: number,
     amsId: number,
