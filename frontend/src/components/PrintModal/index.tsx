@@ -711,6 +711,7 @@ export function PrintModal({
                 isLoading={loadingPrinters}
                 allowMultiple={true}
                 showInactive={mode === 'edit-queue-item'}
+                disableBusy={mode === 'reprint'}
                 printerMappingResults={multiPrinterMapping.printerResults}
                 filamentReqs={effectiveFilamentReqs}
                 onAutoConfigurePrinter={multiPrinterMapping.autoConfigurePrinter}

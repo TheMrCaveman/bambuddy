@@ -124,6 +124,8 @@ export interface PrinterSelectorProps {
   allowMultiple?: boolean;
   /** Show inactive printers (for edit mode where original assignment may be inactive) */
   showInactive?: boolean;
+  /** Disable selection of busy printers (used in reprint mode) */
+  disableBusy?: boolean;
   /** Current assignment mode */
   assignmentMode?: AssignmentMode;
   /** Handler for assignment mode change */
