@@ -171,7 +171,7 @@ function InlineMappingEditor({
             {filterFilamentsByNozzle(printerResult.loadedFilaments, req.nozzle_id)
               .map((f) => (
               <option key={f.globalTrayId} value={f.globalTrayId} className="bg-bambu-dark text-white">
-                {f.label}: {f.type} ({f.colorName})
+                {f.label}: {f.traySubBrands || f.type} ({f.colorName})
               </option>
             ))}
           </select>

@@ -2328,7 +2328,7 @@ export const api = {
   getAvailableFilaments: (model: string, location?: string) => {
     const params = new URLSearchParams({ model });
     if (location) params.set('location', location);
-    return request<Array<{ type: string; color: string; tray_info_idx: string; extruder_id: number | null }>>(`/printers/available-filaments?${params}`);
+    return request<Array<{ type: string; color: string; tray_info_idx: string; tray_sub_brands: string; extruder_id: number | null }>>(`/printers/available-filaments?${params}`);
   },
   getPrinterStatus: (id: number) =>
     request<PrinterStatus>(`/printers/${id}/status`),
