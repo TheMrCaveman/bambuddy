@@ -3408,6 +3408,10 @@ export default {
       proxy: 'Proxy',
       proxyDesc: 'Relais vers imprimante réelle',
     },
+    autoDispatch: {
+      title: 'Lancement automatique',
+      description: 'Lancer automatiquement les impressions ajoutées à la file. Désactivé, les impressions attendent un lancement manuel.',
+    },
     setupRequired: {
       title: 'Configuration requise',
       description: 'Nécessite des réglages système (ports, pare-feu).',

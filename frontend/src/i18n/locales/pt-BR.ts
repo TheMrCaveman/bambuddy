@@ -3407,6 +3407,10 @@ export default {
       proxy: 'Proxy',
       proxyDesc: 'Retransmitir para impressora real',
     },
+    autoDispatch: {
+      title: 'Envio automático',
+      description: 'Iniciar impressões automaticamente quando adicionadas à fila. Quando desativado, as impressões aguardam envio manual.',
+    },
     setupRequired: {
       title: 'Configuração Necessária',
       description: 'O recurso de impressora virtual requer configuração adicional do sistema antes de funcionar. Isso inclui encaminhamento de portas, regras de firewall e configurações específicas da plataforma.',

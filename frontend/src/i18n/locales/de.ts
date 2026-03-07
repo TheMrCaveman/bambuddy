@@ -3416,6 +3416,10 @@ export default {
       proxy: 'Proxy',
       proxyDesc: 'An echten Drucker weiterleiten',
     },
+    autoDispatch: {
+      title: 'Automatisch starten',
+      description: 'Drucke automatisch starten, wenn sie zur Warteschlange hinzugefügt werden. Wenn deaktiviert, warten Drucke auf manuellen Start.',
+    },
     setupRequired: {
       title: 'Einrichtung erforderlich',
       description: 'Die virtuelle Druckerfunktion erfordert zusätzliche Systemkonfiguration, bevor sie funktioniert. Dies beinhaltet Portweiterleitung, Firewall-Regeln und plattformspezifische Einstellungen.',

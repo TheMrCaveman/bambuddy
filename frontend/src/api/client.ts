@@ -4681,6 +4681,7 @@ export interface VirtualPrinterConfig {
   access_code_set: boolean;
   serial: string;
   target_printer_id: number | null;
+  auto_dispatch: boolean;
   bind_ip: string | null;
   remote_interface_ip: string | null;
   position: number;
@@ -4704,6 +4705,7 @@ export const multiVirtualPrinterApi = {
     model?: string;
     access_code?: string;
     target_printer_id?: number;
+    auto_dispatch?: boolean;
     bind_ip?: string;
     remote_interface_ip?: string;
   }) =>
@@ -4719,6 +4721,7 @@ export const multiVirtualPrinterApi = {
     model?: string;
     access_code?: string;
     target_printer_id?: number;
+    auto_dispatch?: boolean;
     bind_ip?: string;
     remote_interface_ip?: string;
   }) =>

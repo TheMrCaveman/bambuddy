@@ -3407,6 +3407,10 @@ export default {
       proxy: 'Proxy',
       proxyDesc: 'Inoltra a stampante reale',
     },
+    autoDispatch: {
+      title: 'Avvio automatico',
+      description: 'Avvia automaticamente le stampe aggiunte alla coda. Se disattivato, le stampe attendono l\'avvio manuale.',
+    },
     setupRequired: {
       title: 'Configurazione necessaria',
       description: 'La stampante virtuale richiede configurazioni di sistema aggiuntive prima di funzionare. Include port forwarding, regole firewall e impostazioni specifiche della piattaforma.',

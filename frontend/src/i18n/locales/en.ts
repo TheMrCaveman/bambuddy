@@ -3421,6 +3421,10 @@ export default {
       proxy: 'Proxy',
       proxyDesc: 'Relay to real printer',
     },
+    autoDispatch: {
+      title: 'Auto-dispatch',
+      description: 'Automatically start prints when added to queue. When off, prints wait for manual dispatch.',
+    },
     setupRequired: {
       title: 'Setup Required',
       description: 'The virtual printer feature requires additional system configuration before it will work. This includes port forwarding, firewall rules, and platform-specific settings.',

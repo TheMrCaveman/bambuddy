@@ -88,6 +88,7 @@ async def test_engine():
         spool_catalog,
         spool_usage_history,
         user,
+        virtual_printer,
     )
 
     async with engine.begin() as conn:
