@@ -71,7 +71,7 @@ import { FileUploadModal } from '../components/FileUploadModal';
 import { PrintModal } from '../components/PrintModal';
 import { PrinterInfoModal } from '../components/PrinterInfoModal';
 import { getGlobalTrayId } from '../utils/amsHelpers';
-import { getPrinterImage, getWifiStrength } from '../utils/printer';
+import { getPrinterImage, getWifiStrength, filterCompatibleQueueItems } from '../utils/printer';
 import { FilamentSlotCircle } from '../components/FilamentSlotCircle';
 import { hexToColorName, parseFilamentColor, isLightColor } from '../utils/colors';
 
@@ -1781,24 +1781,10 @@ function PrinterCard({
   });
   // Filter queue items by filament compatibility (same logic as PrinterQueueWidget)
   // so the badge only shows on printers that can actually run the queued jobs.
+  // An empty Set means no filaments are loaded — jobs requiring specific types are incompatible.
   const queueCount = useMemo(() => {
     if (!queueItems?.length) return 0;
-    return queueItems.filter(item => {
-      if (item.required_filament_types?.length && loadedFilamentTypes?.size) {
-        if (!item.required_filament_types.every((t: string) => loadedFilamentTypes.has(t.toUpperCase()))) {
-          return false;
-        }
-      }
-      if (item.filament_overrides?.length && loadedFilaments?.size) {
-        const hasColorMatch = item.filament_overrides.some((o: { type?: string; color?: string }) => {
-          const oType = (o.type || '').toUpperCase();
-          const oColor = (o.color || '').replace('#', '').toLowerCase().slice(0, 6);
-          return loadedFilaments.has(`${oType}:${oColor}`);
-        });
-        if (!hasColorMatch) return false;
-      }
-      return true;
-    }).length;
+    return filterCompatibleQueueItems(queueItems, loadedFilamentTypes, loadedFilaments).length;
   }, [queueItems, loadedFilamentTypes, loadedFilaments]);
 
   // Fetch currently printing queue item to show who started it (Issue #206)

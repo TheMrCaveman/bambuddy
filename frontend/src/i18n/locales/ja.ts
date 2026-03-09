@@ -3023,6 +3023,7 @@ export default {
     originalFilament: 'オリジナル',
     overrideWith: '変更先',
     resetToOriginal: 'オリジナルに戻す',
+    forceColorMatch: 'カラーマッチを強制',
   },
 
   // Backup
