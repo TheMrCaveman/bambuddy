@@ -4,9 +4,6 @@ All notable changes to Bambuddy will be documented in this file.
 
 ## [0.2.3b1] - Unreleased
 
-### Changed
-- **License changed from MIT to AGPL-3.0** — To prevent unauthorized redistribution of Bambuddy as a closed-source product. All existing contributions were made under MIT, which is forward-compatible with AGPL-3.0. Community contributions and usage are unaffected.
-
 ### New Features
 - **Home Assistant Notification Provider** ([#656](https://github.com/maziggy/bambuddy/issues/656)) — Added Home Assistant as a notification provider. When HA is configured in Settings → Network → Home Assistant, selecting "Home Assistant" as a notification provider sends persistent notifications to the HA dashboard — no additional configuration needed. From there, HA automations can forward notifications to mobile apps, WhatsApp, or any other service. Requested by @TravisWilder.
 
@@ -40,6 +37,9 @@ All notable changes to Bambuddy will be documented in this file.
 
 ### New Features
 - **AMS Info Card & Custom Labels** ([#570](https://github.com/maziggy/bambuddy/pull/570)) — Hovering an AMS label (e.g. "AMS-A") on the Printers page now shows a popover with serial number, firmware version, and an editable friendly name. Custom labels are stored by AMS serial number so they persist when the unit is moved to a different printer. Slot numbers are now displayed inside each filament color circle with auto-inverted contrast for readability. Labels also appear in the Inventory page's location column. Contributed by @cadtoolbox.
+
+### Changes
+- **License changed from MIT to AGPL-3.0** — To prevent unauthorized redistribution of Bambuddy as a closed-source product. All existing contributions were made under MIT, which is forward-compatible with AGPL-3.0. Community contributions and usage are unaffected.
 
 ### Improved
 - **i18n: Settings, Smart Plugs, Notifications, Backup/Restore** — Replaced all hardcoded English strings with translation keys (`t()` calls) across the Settings page, Smart Plug components (SmartPlugCard, AddSmartPlugModal, SwitchbarPopover), Notification components (NotificationProviderCard, AddNotificationModal, NotificationTemplateEditor, NotificationLogViewer), and Backup/Restore components (GitHubBackupSettings, RestoreModal). Added ~600 new translation keys to all 7 supported locales (en, de, ja, fr, it, pt-BR, zh-CN). Removed hardcoded label maps (`PROVIDER_LABELS`, `EVENT_LABELS`, `CATEGORY_LABELS`) in favor of dynamic translation key lookups with fallbacks.
