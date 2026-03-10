@@ -10,7 +10,7 @@ import os
 import platform
 import re
 import zipfile
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query
@@ -63,6 +63,8 @@ async def _get_debug_setting(db: AsyncSession) -> tuple[bool, datetime | None]:
     if enabled_at_setting and enabled_at_setting.value:
         try:
             enabled_at = datetime.fromisoformat(enabled_at_setting.value)
+            if enabled_at.tzinfo is None:
+                enabled_at = enabled_at.replace(tzinfo=timezone.utc)
         except ValueError:
             pass  # Ignore malformed timestamp; enabled_at stays None
 
@@ -80,7 +82,7 @@ async def _set_debug_setting(db: AsyncSession, enabled: bool) -> datetime | None
         db.add(Settings(key="debug_logging_enabled", value=str(enabled).lower()))
 
     # Update enabled_at timestamp
-    enabled_at = datetime.now() if enabled else None
+    enabled_at = datetime.now(tz=timezone.utc) if enabled else None
     result = await db.execute(select(Settings).where(Settings.key == "debug_logging_enabled_at"))
     at_setting = result.scalar_one_or_none()
     if at_setting:
@@ -127,7 +129,7 @@ async def get_debug_logging_state(
 
     duration = None
     if enabled and enabled_at:
-        duration = int((datetime.now() - enabled_at).total_seconds())
+        duration = int((datetime.now(tz=timezone.utc) - enabled_at).total_seconds())
 
     return DebugLoggingState(
         enabled=enabled,
@@ -149,7 +151,7 @@ async def toggle_debug_logging(
 
     duration = None
     if toggle.enabled and enabled_at:
-        duration = int((datetime.now() - enabled_at).total_seconds())
+        duration = int((datetime.now(tz=timezone.utc) - enabled_at).total_seconds())
 
     return DebugLoggingState(
         enabled=toggle.enabled,
