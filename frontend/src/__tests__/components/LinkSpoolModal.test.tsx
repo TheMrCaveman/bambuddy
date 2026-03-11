@@ -54,6 +54,7 @@ describe('LinkSpoolModal', () => {
       filament_material: 'PLA',
       filament_color_hex: 'FF0000',
       remaining_weight: 800,
+      location: null,
     },
     {
       id: 2,
@@ -61,13 +62,14 @@ describe('LinkSpoolModal', () => {
       filament_material: 'PETG',
       filament_color_hex: '0000FF',
       remaining_weight: 500,
+      location: null,
     },
   ];
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(api.getUnlinkedSpools).mockResolvedValue(mockSpools);
-    vi.mocked(api.linkSpool).mockResolvedValue({});
+    vi.mocked(api.linkSpool).mockResolvedValue({ success: true, message: 'ok' });
   });
 
   describe('rendering', () => {
@@ -125,7 +127,12 @@ describe('LinkSpoolModal', () => {
       fireEvent.click(screen.getByText(/Generic PLA Red/).closest('button')!);
 
       await waitFor(() => {
-        expect(api.linkSpool).toHaveBeenCalledWith(1, 'A1B2C3D4E5F6A1B2C3D4E5F6A1B2C3D4');
+        expect(api.linkSpool).toHaveBeenCalledWith(1, {
+          spoolTag: 'ABCD1234',
+          printerId: 1,
+          amsId: 0,
+          trayId: 0,
+        });
       });
     });
 

@@ -46,7 +46,12 @@ export function LinkSpoolModal({ isOpen, onClose, tagUid, trayUuid, printerId, a
 
   const linkMutation = useMutation({
     mutationFn: (spoolId: number) =>
-      api.linkSpool(spoolId, spoolTag!),
+      api.linkSpool(spoolId, {
+        spoolTag: spoolTag!,
+        printerId,
+        amsId,
+        trayId,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['unlinked-spools'] });
       queryClient.invalidateQueries({ queryKey: ['linked-spools'] });
