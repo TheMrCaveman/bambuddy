@@ -27,6 +27,7 @@ All notable changes to Bambuddy will be documented in this file.
 
 ### Changed
 - **CI: Node.js 20 → 22** — Updated GitHub Actions workflows (`ci.yml`, `security.yml`) from Node.js 20 to Node.js 22 LTS ahead of [GitHub's Node 20 deprecation](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/).
+- **Daily Builds Falsely Trigger Update Notification** — The version parser misclassified daily build tags (e.g. `0.2.2b4-daily.20260313`) as full releases instead of betas, because the `-daily.YYYYMMDD` suffix pushed the last dot-segment to a pure number (`20260313`), bypassing the prerelease detection. Users running the same beta version saw a spurious "update available" notification after each daily build. Now strips the daily suffix before parsing.
 
 
 ## [0.2.2b3] - 2026-03-12
