@@ -445,11 +445,9 @@ async def on_printer_status_change(printer_id: int, state: PrinterState):
         _last_progress_milestone[printer_id] = 0
         _first_layer_notified[printer_id] = False
 
-    # HMS error codes that should not trigger notifications.
-    # These are infrastructure/auth issues, not actionable print errors.
+    # HMS error codes that should not trigger notifications even though they
+    # have known descriptions (e.g. user-initiated actions, not real errors).
     _HMS_NOTIFICATION_SUPPRESS = {
-        "0500_0007",  # MQTT command verification failed (auth/bind issue, not a print error)
-        "0500_4001",  # Failed to connect to Bambu Cloud (network issue)
         "0500_400E",  # Printing was cancelled (user action, not an error)
     }
 
@@ -497,6 +495,7 @@ async def on_printer_status_change(printer_id: int, state: PrinterState):
                         printer_id, printer, logging.getLogger(__name__)
                     )
 
+                    sent_count = 0
                     for error in new_errors:
                         module_name = module_names.get(error.module, f"Module 0x{error.module:02X}")
                         # Build short code like "0700_8010"
@@ -505,21 +504,24 @@ async def on_printer_status_change(printer_id: int, state: PrinterState):
                         error_code_masked = error_code_int & 0xFFFF
                         short_code = f"{(error.attr >> 16) & 0xFFFF:04X}_{error_code_masked:04X}"
 
-                        if short_code in _HMS_NOTIFICATION_SUPPRESS:
+                        # Only notify for errors with known descriptions — printers
+                        # send many undocumented/phantom codes that aren't real errors.
+                        description = get_error_description(short_code)
+                        if not description or short_code in _HMS_NOTIFICATION_SUPPRESS:
                             continue
 
                         error_type = f"{module_name} Error"
-                        # Look up human-readable description
-                        description = get_error_description(short_code)
-                        error_detail = description if description else f"Error code: {short_code}"
+                        error_detail = description
 
                         await notification_service.on_printer_error(
                             printer_id, printer_name, error_type, db, error_detail, image_data=error_image_data
                         )
+                        sent_count += 1
 
-                    logging.getLogger(__name__).info(
-                        f"[HMS] Sent notification for {len(new_errors)} new error(s) on printer {printer_id}"
-                    )
+                    if sent_count:
+                        logging.getLogger(__name__).info(
+                            f"[HMS] Sent notification for {sent_count} error(s) on printer {printer_id}"
+                        )
 
                     # Also publish to MQTT relay
                     printer_info = printer_manager.get_printer(printer_id)
